@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
@@ -31,10 +33,10 @@ public final class ConfigurationLoader {
      *
      * @return the loaded {@link CrawlerConfiguration}.
      */
-    public CrawlerConfiguration load() {
-        // TODO: Fill in this method.
-
-        return new CrawlerConfiguration.Builder().build();
+    public CrawlerConfiguration load() throws IOException {
+        try (var reader = Files.newBufferedReader(this.path)) {
+            return read(reader);
+        }
     }
 
     /**
