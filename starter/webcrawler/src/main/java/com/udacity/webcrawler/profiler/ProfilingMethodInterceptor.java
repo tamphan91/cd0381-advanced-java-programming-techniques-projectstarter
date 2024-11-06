@@ -30,23 +30,25 @@ final class ProfilingMethodInterceptor implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-      Object invoked;
-      Instant start = null;
-      boolean profiled = method.getAnnotation(Profiled.class) != null;
-      if (profiled) {
-        start = clock.instant();
-      }
-      try {
-        invoked = method.invoke(delegate, args);
-      } catch (InvocationTargetException ex) {
-        throw ex.getTargetException();
-      } finally {
+        Object invoked;
+        Instant start = null;
+        boolean profiled = method.getAnnotation(Profiled.class) != null;
         if (profiled) {
-          Duration duration = Duration.between(start, clock.instant());
-          state.record(delegate.getClass(), method, duration);
+            start = clock.instant();
         }
-      }
+        try {
+            invoked = method.invoke(delegate, args);
+        } catch (InvocationTargetException ex) {
+            throw ex.getTargetException();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (profiled) {
+                Duration duration = Duration.between(start, clock.instant());
+                state.record(delegate.getClass(), method, duration);
+            }
+        }
 
-      return invoked;
+        return invoked;
     }
 }
